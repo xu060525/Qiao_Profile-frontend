@@ -19,7 +19,7 @@ export default function KnowledgeGraph() {
 
   useEffect(() => {
     setIsMounted(true);
-    fetch("${API_BASE_URL}/api/v1/graph/")
+    fetch(`${API_BASE_URL}/api/v1/graph/`)
       .then((res) => res.json())
       .then((data: GraphData) => setGraphData(data))
       .catch((err) => console.error(err));
