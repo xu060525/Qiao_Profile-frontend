@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { API_BASE_URL } from "@/config";
 
 interface Message {
   role: "user" | "ai";
@@ -25,7 +26,7 @@ export default function ChatBox() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/chat/", {
+      const res = await fetch("${API_BASE_URL}/api/v1/chat/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: userMessage }),

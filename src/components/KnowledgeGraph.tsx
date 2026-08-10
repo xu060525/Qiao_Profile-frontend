@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { API_BASE_URL } from "@/config";
 
 interface GraphData {
   nodes: any[];
@@ -18,7 +19,7 @@ export default function KnowledgeGraph() {
 
   useEffect(() => {
     setIsMounted(true);
-    fetch("http://localhost:8000/api/v1/graph/")
+    fetch("${API_BASE_URL}/api/v1/graph/")
       .then((res) => res.json())
       .then((data: GraphData) => setGraphData(data))
       .catch((err) => console.error(err));

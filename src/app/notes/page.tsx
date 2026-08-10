@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/config";
 
 interface Note {
   id: string;
@@ -18,7 +19,7 @@ export default function NotesPage() {
 
   const fetchNotes = async (): Promise<void> => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/notes/");
+      const res = await fetch("${API_BASE_URL}/api/v1/notes/");
       const data = await res.json();
       setNotes(data);
     } catch (error) {
@@ -39,7 +40,7 @@ export default function NotesPage() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("http://localhost:8000/api/v1/notes/", {
+      const res = await fetch("${API_BASE_URL}/api/v1/notes/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: title.trim(), content: content.trim() }),
