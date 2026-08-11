@@ -5,11 +5,17 @@ import { API_BASE_URL } from "@/config";
 import { createClient } from "@/utils/supabase/client";
 import BlockEditor from "@/components/BlockEditor";
 import { format } from "path";
+import Link from "next/link";
 
 interface Note {
   id: string;
   content: string;
   created_at: string;
+  metadata?: {
+    title?: string;
+    format?: string;
+    source?: string;
+  };
 }
 
 // 站长专属白名单（只有这个邮箱能看到发布框）
@@ -105,7 +111,7 @@ export default function NotesPage() {
               placeholder="Title..."
               className="w-full bg-transparent text-2xl font-bold text-white placeholder-neutral-700 border-none focus:outline-none mb-6 pb-4 border-b border-neutral-800/50"
             />
-            
+
             {/* 支持实时 Markdown 渲染 */}
             <BlockEditor content={newNote} onChange={setNewNote} />
             <div className="flex justify-between items-center mt-4 pt-4 border-t border-neutral-800/50">
@@ -125,25 +131,35 @@ export default function NotesPage() {
         )}
 
         <div className="space-y-6">
-          {notes.map((note) => (
-            <div 
-              key={note.id} 
-              className="bg-[#121212] border border-neutral-800/60 rounded-2xl p-6 hover:border-orange-500/30 transition-all cursor-pointer group"
-            >
-              <div className="text-neutral-400 mb-4 font-mono text-xs flex items-center gap-4">
-                <span>{new Date(note.created_at).toLocaleString()}</span>
-                <span className="bg-neutral-800/50 text-neutral-500 px-2 py-1 rounded-md group-hover:text-orange-500/80 transition-colors">
-                  ID: {note.id.substring(0, 8)}
-                </span>
-              </div>
-
-              {/* 支持富文本排版 */}
-              <div
-                className="prose prose-invert prose-orange max-w-none text-meutral-300 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: note.content }}
-              />
-            </div>
-          ))}
+          {notes.map((note) => {
+            // 尝试从元数据中提取标题，如果没有则用 ID 兜底
+            const displayTitle = note.metadata?.title || `Fragment // ${note.id.substring(0, 8)}`;
+            
+            return (
+              <Link 
+                key={note.id} 
+                href={`/notes/${note.id}`}
+                className="block bg-[#121212] border border-neutral-800/60 rounded-2xl p-6 hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-500/5 transition-all cursor-pointer group relative overflow-hidden"
+              >
+                {/* 悬停时的左侧高亮光带 */}
+                <div className="absolute top-0 left-0 w-1 h-full bg-orange-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                
+                <h2 className="text-xl font-bold text-neutral-200 mb-3 group-hover:text-orange-400 transition-colors">
+                  {displayTitle}
+                </h2>
+                
+                <div className="text-neutral-500 mb-4 font-mono text-xs flex items-center gap-4">
+                  <span>{new Date(note.created_at).toLocaleString()}</span>
+                </div>
+                
+                {/* 列表页的内容预览，我们用 CSS 的 line-clamp 截断它，防止太长 */}
+                <div 
+                  className="prose prose-invert prose-sm text-neutral-400 line-clamp-3 opacity-70"
+                  dangerouslySetInnerHTML={{ __html: note.content }}
+                />
+              </Link>
+            );
+          })}
           {notes.length === 0 && (
             <div className="text-center py-20 text-neutral-600 font-mono">
               / No memory fragments found. /
