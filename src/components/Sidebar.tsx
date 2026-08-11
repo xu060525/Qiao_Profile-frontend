@@ -1,5 +1,8 @@
-import React, { ReactNode } from "react";
+"use client"
+
+import React, { ReactNode, useState } from "react";
 import Link from "next/link";
+import AuthModal from "./AuthModal";
 
 interface NavItem {
   name: string;
@@ -8,6 +11,8 @@ interface NavItem {
 }
 
 export default function Sidebar() {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false); 
+
   const navItems: NavItem[] = [
     {
       name: "主控台",
@@ -30,35 +35,52 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-[#121212] border-r border-neutral-800/50 flex flex-col h-screen fixed left-0 top-0 z-50">
-      <div className="h-24 flex items-center px-8 border-b border-neutral-800/50">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center font-bold text-white shadow-lg shadow-orange-500/20 mr-4">
-          Sys
+    <>
+      <aside className="w-64 bg-[#121212] border-r border-neutral-800/50 flex flex-col h-screen fixed left-0 top-0 z-40">
+        <div className="h-24 flex items-center px-8 border-b border-neutral-800/50">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center font-bold text-white shadow-lg shadow-orange-500/20 mr-4">
+            Sys
+          </div>
+          <span className="text-neutral-200 font-semibold text-xl tracking-wide">
+            Core<span className="text-orange-500">.</span>
+          </span>
         </div>
-        <span className="text-neutral-200 font-semibold text-xl tracking-wide">
-          Core<span className="text-orange-500">.</span>
-        </span>
-      </div>
 
-      <nav className="flex-1 px-4 py-8 space-y-2">
-        {navItems.map((item, index) => (
-          <Link
-            key={index}
-            href={item.href}
-            className="flex items-center gap-3 px-4 py-3 text-neutral-400 hover:text-orange-500 hover:bg-orange-500/10 rounded-2xl transition-all font-medium"
+        <nav className="flex-1 px-4 py-8 space-y-2">
+          {navItems.map((item, index) => (
+            <Link
+              key={index}
+              href={item.href}
+              className="flex items-center gap-3 px-4 py-3 text-neutral-400 hover:text-orange-500 hover:bg-orange-500/10 rounded-2xl transition-all font-medium"
+            >
+              {item.icon}
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="p-6 border-t border-neutral-800/50 flex flex-col gap-4">
+          <button 
+            onClick={() => setIsAuthModalOpen(true)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-neutral-800/50 hover:bg-orange-500/20 text-neutral-300 hover:text-orange-400 rounded-xl border border-neutral-700/50 hover:border-orange-500/30 transition-all font-medium text-sm"
           >
-            {item.icon}
-            {item.name}
-          </Link>
-        ))}
-      </nav>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+            System Login
+          </button>
 
-      <div className="p-6 border-t border-neutral-800/50">
-        <div className="flex items-center gap-3 px-4 py-3 bg-[#0a0a0a] rounded-2xl border border-neutral-800/50">
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></div>
-          <span className="text-xs text-neutral-400 font-mono">Backend Online</span>
+          <div className="flex items-center gap-3 px-4 py-3 bg-[#0a0a0a] rounded-xl border border-neutral-800/50">
+            <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></div>
+            <span className="text-xs text-neutral-400 font-mono">Backend Online</span>
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
+    </>
   );
 }
