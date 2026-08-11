@@ -11,11 +11,7 @@ interface Note {
   id: string;
   content: string;
   created_at: string;
-  metadata?: {
-    title?: string;
-    format?: string;
-    source?: string;
-  };
+  title: string;
 }
 
 // 站长专属白名单（只有这个邮箱能看到发布框）
@@ -133,7 +129,7 @@ export default function NotesPage() {
         <div className="space-y-6">
           {notes.map((note) => {
             // 尝试从元数据中提取标题，如果没有则用 ID 兜底
-            const displayTitle = note.metadata?.title || `Fragment // ${note.id.substring(0, 8)}`;
+            const displayTitle = note.title || `Fragment // ${note.id.substring(0, 8)}`;
             
             return (
               <Link 

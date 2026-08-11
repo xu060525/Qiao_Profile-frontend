@@ -9,11 +9,7 @@ interface Note {
   id: string; 
   content: string; 
   created_at: string; 
-  metadata?: {
-    title?: string;
-    format?: string; 
-    source?: string;
-  };
+  title: string; 
 }
 
 export default function NoteDetailPage() {
@@ -67,7 +63,7 @@ export default function NoteDetailPage() {
     );
   }
 
-  const title = note.metadata?.title || `Fragment // ${note.id.substring(0, 8)}`;
+  const title = note.title || `Fragment // ${note.id.substring(0, 8)}`;
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] pl-64 text-neutral-200">
