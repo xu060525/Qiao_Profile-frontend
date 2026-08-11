@@ -24,3 +24,44 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* TipTap 编辑器核心样式，确保 Markdown 标题能够正常显示 */
+.ProseMirror h1 {
+  font-size: 2.25rem !important;
+  font-weight: 700 !important;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: white;
+}
+.ProseMirror h2 {
+  font-size: 1.875rem !important;
+  font-weight: 600 !important;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: #f3f4f6;
+}
+.ProseMirror h3 {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+}
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #525252;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.ProseMirror pre {
+  background: #000000 !important;
+  border: 1px solid #262626;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  color: #e5e7eb;
+  font-family: monospace;
+}
+.ProseMirror code {
+  color: #f97316; /* Tailwind 橙色 */
+  background: rgba(249, 115, 22, 0.1);
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
+}
