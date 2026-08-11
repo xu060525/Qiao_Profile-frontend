@@ -1,142 +1,142 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "@/config";
+import { createClient } from "@/utils/supabase/client";
 
 interface Note {
   id: string;
-  title: string;
   content: string;
   created_at: string;
 }
 
+// 站长专属白名单（只有这个邮箱能看到发布框）
+const ADMIN_EMAIL = "2377392781@qq.com"; // <--- 请务必替换为你的邮箱！
+
 export default function NotesPage() {
   const [notes, setNotes] = useState<Note[]>([]);
-  const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [newNote, setNewNote] = useState("");
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
-  const fetchNotes = async (): Promise<void> => {
+  const supabase = createClient();
+
+  useEffect(() => {
+    fetchNotes();
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session && session.user.email === ADMIN_EMAIL) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
+    } catch (error) {
+      console.error("Auth check failed:", error);
+    } finally {
+      setIsLoadingAuth(false);
+    }
+  };
+
+  const fetchNotes = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/v1/notes/`);
       const data = await res.json();
       setNotes(data);
     } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+      console.error("Failed to fetch notes:", error);
     }
   };
 
-  useEffect(() => {
-    fetchNotes();
-  }, []);
-
-  const handlePublish = async (): Promise<void> => {
-    if (!title.trim() || !content.trim()) {
-      return;
-    }
-
-    setIsSubmitting(true);
+  const handlePublish = async () => {
+    if (!newNote.trim()) return;
+    
+    setIsPublishing(true);
     try {
       const res = await fetch(`${API_BASE_URL}/api/v1/notes/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim(), content: content.trim() }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: newNote,
+          metadata: { source: "web_client" }
+        })
       });
-      
+
       if (res.ok) {
-        setTitle("");
-        setContent("");
-        fetchNotes();
+        setNewNote("");
+        fetchNotes(); // 重新拉取列表
       }
     } catch (error) {
-      console.error(error);
+      console.error("Failed to publish:", error);
     } finally {
-      setIsSubmitting(false);
+      setIsPublishing(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-neutral-200 p-6 md:p-12">
-      <div className="max-w-5xl mx-auto flex flex-col gap-8">
-        
-        <header className="border-b border-neutral-800/50 pb-6">
-          <h1 className="text-3xl font-bold tracking-tight text-white mb-2">知识库</h1>
-          <p className="text-neutral-500">所有的思考片段都会在这里被自动向量化，并编织进星空图谱。</p>
-        </header>
+    <div className="min-h-screen bg-[#0a0a0a] pl-64 text-neutral-200">
+      <main className="max-w-4xl mx-auto p-12">
+        <h1 className="text-3xl font-bold mb-8 text-white tracking-wide">
+          Knowledge Base<span className="text-orange-500">.</span>
+        </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          <section className="lg:col-span-1 bg-[#121212] border border-neutral-800/50 rounded-[2rem] p-6 shadow-2xl h-fit">
-            <h2 className="text-lg font-medium text-neutral-300 mb-6 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-              发布新神经元
-            </h2>
-            
-            <div className="flex flex-col gap-4">
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="概念或标题..."
-                className="w-full bg-[#0a0a0a] border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500/50 transition-colors"
-              />
-              
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="输入正文内容（支持长文本，后台会自动进行语义切块）..."
-                rows={6}
-                className="w-full bg-[#0a0a0a] border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500/50 transition-colors resize-none scrollbar-thin scrollbar-thumb-gray-700"
-              />
-              
+        {/* 权限门控：只有管理员才能看到这个输入框区域 */}
+        {!isLoadingAuth && isAdmin && (
+          <div className="bg-[#121212] border border-neutral-800 rounded-2xl p-6 mb-12 shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-orange-500 rounded-l-2xl"></div>
+            <textarea
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              placeholder="记录新的认知碎片... (支持 Markdown 构思中)"
+              className="w-full bg-transparent border-none text-neutral-300 placeholder-neutral-600 focus:outline-none resize-none min-h-[120px] text-lg leading-relaxed"
+            />
+            <div className="flex justify-between items-center mt-4 pt-4 border-t border-neutral-800/50">
+              <span className="text-xs text-neutral-500 font-mono flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></div>
+                Admin Access Granted
+              </span>
               <button
                 onClick={handlePublish}
-                disabled={isSubmitting || !title.trim() || !content.trim()}
-                className="w-full bg-orange-500 hover:bg-orange-400 disabled:bg-neutral-800 disabled:text-neutral-600 text-white py-3 rounded-xl font-medium transition-all shadow-md shadow-orange-500/10 mt-2"
+                disabled={isPublishing || !newNote.trim()}
+                className="px-6 py-2 bg-orange-500 hover:bg-orange-400 disabled:bg-neutral-800 disabled:text-neutral-500 text-white font-medium rounded-xl transition-all shadow-lg shadow-orange-500/20"
               >
-                {isSubmitting ? "正在注入高维空间..." : "发布到图谱"}
+                {isPublishing ? "Syncing..." : "Commit /"}
               </button>
             </div>
-          </section>
+          </div>
+        )}
 
-          <section className="lg:col-span-2 flex flex-col gap-4">
-            <h2 className="text-lg font-medium text-neutral-300 mb-2 flex items-center gap-2">
-              <span className="text-orange-500 font-bold">#</span>
-              已存储的知识切片
-            </h2>
-            
-            {isLoading ? (
-              <div className="text-neutral-500 animate-pulse bg-[#121212] p-6 rounded-[2rem] border border-neutral-800/50">
-                正在读取记忆...
+        <div className="space-y-6">
+          {notes.map((note) => (
+            <div 
+              key={note.id} 
+              className="bg-[#121212] border border-neutral-800/60 rounded-2xl p-6 hover:border-orange-500/30 transition-all cursor-pointer group"
+            >
+              <div className="text-neutral-400 mb-4 font-mono text-xs flex items-center gap-4">
+                <span>{new Date(note.created_at).toLocaleString()}</span>
+                <span className="bg-neutral-800/50 text-neutral-500 px-2 py-1 rounded-md group-hover:text-orange-500/80 transition-colors">
+                  ID: {note.id.substring(0, 8)}
+                </span>
               </div>
-            ) : notes.length === 0 ? (
-              <div className="text-neutral-500 bg-[#121212] p-6 rounded-[2rem] border border-neutral-800/50">
-                知识库空空如也，快去发布第一篇笔记吧！
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {notes.map((note) => (
-                  <div key={note.id} className="bg-[#121212] border border-neutral-800/50 rounded-2xl p-6 hover:border-orange-500/30 transition-colors group">
-                    <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-orange-400 transition-colors">
-                      {note.title}
-                    </h3>
-                    <p className="text-neutral-400 text-sm line-clamp-3 leading-relaxed mb-4">
-                      {note.content}
-                    </p>
-                    <div className="text-xs text-neutral-600 font-mono">
-                      ID: {note.id.split("-")[0]}...
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
+              <p className="text-neutral-300 leading-relaxed">
+                {note.content}
+              </p>
+            </div>
+          ))}
+          {notes.length === 0 && (
+            <div className="text-center py-20 text-neutral-600 font-mono">
+              / No memory fragments found. /
+            </div>
+          )}
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
