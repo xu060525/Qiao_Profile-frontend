@@ -19,7 +19,7 @@ interface Note {
 }
 
 // 站长专属白名单（只有这个邮箱能看到发布框）
-const ADMIN_EMAIL = "2377392781@qq.com"; // <--- 请务必替换为你的邮箱！
+const ADMIN_EMAIL = "2377392781@qq.com"; 
 
 export default function NotesPage() {
   const [notes, setNotes] = useState<Note[]>([]);
