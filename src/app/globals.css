@@ -59,9 +59,21 @@ body {
   color: #e5e7eb;
   font-family: monospace;
 }
-.ProseMirror code {
-  color: #f97316; /* Tailwind 橙色 */
+/* 只针对段落、列表、标题里的行内代码进行橙色高亮 */
+.ProseMirror p code, 
+.ProseMirror li code, 
+.ProseMirror h1 code, 
+.ProseMirror h2 code, 
+.ProseMirror h3 code {
+  color: #f97316;
   background: rgba(249, 115, 22, 0.1);
   padding: 0.1rem 0.3rem;
   border-radius: 0.25rem;
+}
+
+/* 确保代码块里的字体继承 highlight.js 的主题颜色 */
+.ProseMirror pre code {
+  color: inherit;
+  background: none;
+  padding: 0;
 }

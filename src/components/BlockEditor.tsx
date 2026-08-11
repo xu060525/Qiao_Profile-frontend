@@ -2,7 +2,15 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { common, createLowlight } from 'lowlight'
 import { useEffect } from 'react';
+
+// 阴图 Atom One Dark 代码高亮主题
+import 'highlight.js/styles/atom-one-dark.css'; 
+
+// 初始化 lowlight, 加载常用的语言解析器
+const lowlight = createLowlight(common); 
 
 interface BlockEditorProps {
   content: string;
@@ -17,7 +25,13 @@ export default function BlockEditor({ content, onChange }: BlockEditorProps) {
         heading: {
           levels: [1, 2, 3],
         },
+        // 关闭 StarterKit 默认的代码块
+        codeBlock: false, 
       }),
+      // 挂载代码块解析引擎
+      CodeBlockLowlight.configure({
+        lowlight, 
+      })
     ],
     content: content,
     // 每次输入内容变化时，将生成的 HTML 传回给父组件
@@ -26,7 +40,7 @@ export default function BlockEditor({ content, onChange }: BlockEditorProps) {
     },
     editorProps: {
       attributes: {
-        // 这里的 class 非常关键，它是 Tailwind 针对富文本的定制化排版
+        // 这里的 class 是 Tailwind 针对富文本的定制化排版
         class: 'prose prose-invert prose-orange max-w-none focus:outline-none min-h-[120px] text-lg leading-relaxed',
       },
     },
